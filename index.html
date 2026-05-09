@@ -223,7 +223,7 @@ const protocols = [
     characteristics: [
       { label: "Algoritmo",     val: "Dijkstra (SPF)" },
       { label: "Métrica",       val: "Costo (ancho de banda)" },
-      { label: "Actualización", val: "LSA multicast (224.0.0.5/6)" },
+      { label: "Actualización", val: "LSA multicast 224.0.0.5 (todos los routers OSPF) y 224.0.0.6 (DR/BDR)" },
       { label: "Convergencia",  val: "Rápida" },
       { label: "Estándar",      val: "RFC 2328 (v2)" },
       { label: "AD (Cisco)",    val: "110" },
@@ -269,7 +269,7 @@ const protocols = [
       { label: "Algoritmo",     val: "Path-Vector / Políticas" },
       { label: "Métrica",       val: "Atributos (AS-Path, MED…)" },
       { label: "Actualización", val: "Incremental TCP 179" },
-      { label: "Convergencia",  val: "Lenta (diseño estable)" },
+      { label: "Convergencia",  val: "Lenta (para diseño estable)" },
       { label: "Estándar",      val: "RFC 4271 (BGP-4)" },
       { label: "AD (Cisco)",    val: "20 eBGP / 200 iBGP" },
     ],
