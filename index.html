@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarjetas didácticas — Protocolos de enrutamiento</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-page: #1a1a18;
+    --bg-card: #2b2b28;
+    --bg-surface: #343430;
+    --bg-tag: #3a3a36;
+    --txt-primary: #e8e6df;
+    --txt-secondary: #a8a69e;
+    --txt-tertiary: #6e6c66;
+    --border-card: rgba(255,255,255,0.08);
+    --border-tag: rgba(255,255,255,0.06);
+    --accent: #1db898;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    background: var(--bg-page);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    color: var(--txt-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem 3rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .hdr {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding-top: .5rem;
+  }
+  .hdr h1 {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--txt-primary);
+    margin-bottom: 5px;
+    letter-spacing: -.2px;
+  }
+  .hdr p {
+    font-size: 13px;
+    color: var(--txt-tertiary);
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .tab-btn {
+    padding: 6px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 0.5px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    background: var(--bg-surface);
+    color: var(--txt-secondary);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .tab-btn:hover:not(.active) {
+    background: var(--bg-tag);
+    color: var(--txt-primary);
+  }
+
+  .card-wrap {
+    perspective: 1000px;
+    width: 100%;
+    height: 430px;
+    margin: 0 auto 1.5rem;
+    cursor: pointer;
+  }
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform .55s cubic-bezier(.4,0,.2,1);
+  }
+  .card-inner.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: var(--radius-lg);
+    border: 0.5px solid var(--border-card);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-card);
+  }
+  .card-back { transform: rotateY(180deg); }
+
+  /* FRONT */
+  .card-front-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 2rem;
+    gap: 1rem;
+  }
+  .proto-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 12px;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+  }
+  .proto-name {
+    font-size: 48px;
+    font-weight: 600;
+    color: var(--txt-primary);
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+  .proto-full {
+    font-size: 15px;
+    color: var(--txt-secondary);
+    text-align: center;
+    max-width: 360px;
+    line-height: 1.5;
+  }
+  .flip-hint {
+    font-size: 12px;
+    color: var(--txt-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: .5rem;
+  }
+
+  /* BACK */
+  .card-back-header {
+    padding: 1rem 1.25rem .8rem;
+    border-bottom: 0.5px solid var(--border-card);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .back-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 10px;
+  }
+  .back-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--txt-primary);
+  }
+  .card-back-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bg-surface) transparent;
+  }
+  .card-back-body::-webkit-scrollbar { width: 4px; }
+  .card-back-body::-webkit-scrollbar-track { background: transparent; }
+  .card-back-body::-webkit-scrollbar-thumb { background: var(--bg-surface); border-radius: 4px; }
+
+  .section-block { margin-bottom: 1.1rem; }
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--txt-tertiary);
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    margin-bottom: 7px;
+  }
+  .desc-text {
+    font-size: 13px;
+    color: var(--txt-secondary);
+    line-height: 1.65;
+  }
+  .grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+  .info-cell {
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    padding: 8px 10px;
+  }
+  .ic-label { font-size: 11px; color: var(--txt-tertiary); margin-bottom: 2px; }
+  .ic-val { font-size: 13px; font-weight: 500; color: var(--txt-primary); }
+
+  .tags-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 8px;
+    background: var(--bg-tag);
+    color: var(--txt-secondary);
+    border: 0.5px solid var(--border-tag);
+  }
+
+  .ref-link {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 7px 9px;
+    border-radius: 7px;
+    border: 0.5px solid rgba(255,255,255,0.07);
+    background: var(--bg-surface);
+    margin-bottom: 6px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    transition: background .15s;
+  }
+  .ref-link:hover { background: var(--bg-tag); }
+  .ref-link i { flex-shrink: 0; font-size: 14px; }
+
+  .video-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .video-chip {
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 0.5px solid var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background .15s;
+  }
+  .video-chip:hover { background: rgba(29,184,152,.1); }
+
+  /* FOOTER */
+  .card-footer {
+    padding: .75rem 1.25rem;
+    border-top: 0.5px solid var(--border-card);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .prog { font-size: 12px; color: var(--txt-tertiary); }
+  .face-label { font-size: 12px; color: var(--txt-tertiary); }
+
+  /* NAV BUTTONS */
+  .nav-btns {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .nav-btn {
+    padding: 8px 22px;
+    font-size: 13px;
+    border: 0.5px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    background: var(--bg-surface);
+    color: var(--txt-secondary);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-btn:hover { background: var(--bg-tag); color: var(--txt-primary); }
+  .nav-btn:active { transform: scale(.97); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hdr">
+    <h1>Tarjetas didácticas — Protocolos de enrutamiento</h1>
+    <p>Haz clic en la tarjeta para voltearla y ver la información completa</p>
+  </div>
+
+  <div class="nav-tabs" id="tabs"></div>
+
+  <div class="card-wrap" onclick="flipCard()">
+    <div class="card-inner" id="cardInner">
+      <div class="card-face" id="cFront"></div>
+      <div class="card-face card-back" id="cBack"></div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="nav-btn" onclick="move(-1)">
+      <i class="ti ti-arrow-left"></i> Anterior
+    </button>
+    <button class="nav-btn" onclick="flipCard()">
+      <i class="ti ti-refresh"></i> Voltear
+    </button>
+    <button class="nav-btn" onclick="move(1)">
+      Siguiente <i class="ti ti-arrow-right"></i>
+    </button>
+  </div>
+
+</div>
+
+<script>
+const protocols = [
+  {
+    abbr: "RIP",
+    full: "Routing Information Protocol",
+    type: "IGP / Distance-Vector",
+    color: { badge: "#3d2e0a", badgeTxt: "#f0a832" },
+    desc: "Protocolo de enrutamiento por vector de distancia más antiguo y sencillo. Utiliza el conteo de saltos (hop count) como única métrica, con un máximo de 15 saltos. Existen dos versiones: RIPv1 (classfull) y RIPv2 (classless, soporta VLSM/CIDR).",
+    characteristics: [
+      { label: "Algoritmo",     val: "Bellman-Ford" },
+      { label: "Métrica",       val: "Hop Count (máx 15)" },
+      { label: "Actualización", val: "Cada 30 seg (broadcast)" },
+      { label: "Convergencia",  val: "Lenta" },
+      { label: "Estándar",      val: "RFC 2453 (v2)" },
+      { label: "AD (Cisco)",    val: "120" },
+    ],
+    tags: ["Classless (v2)", "VLSM", "UDP puerto 520", "Horizonte dividido", "Poison reverse"],
+    refs: [
+      { txt: "RFC 2453 – RIP Version 2 (IETF)",          url: "https://www.rfc-editor.org/rfc/rfc2453" },
+      { txt: "Cisco – RIP Configuration Guide",           url: "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/iproute_rip/configuration/xe-16/irr-xe-16-book.html" },
+      { txt: "Forouzan – Data Communications & Networking",url: "https://books.google.com/books?id=5Sd8AAAAQBAJ" },
+    ],
+    videos: [{ txt: "RIP explicado (YouTube)", url: "https://www.youtube.com/results?search_query=RIP+routing+protocol+explained" }]
+  },
+  {
+    abbr: "OSPF",
+    full: "Open Shortest Path First",
+    type: "IGP / Link-State",
+    color: { badge: "#0a1f38", badgeTxt: "#5ea8f0" },
+    desc: "Protocolo de estado de enlace basado en el algoritmo de Dijkstra (SPF). Divide la red en áreas jerárquicas (backbone Area 0). Converge rápidamente, soporta VLSM/CIDR, autenticación y rutas de igual costo (ECMP). Versión OSPFv3 para IPv6.",
+    characteristics: [
+      { label: "Algoritmo",     val: "Dijkstra (SPF)" },
+      { label: "Métrica",       val: "Costo (ancho de banda)" },
+      { label: "Actualización", val: "LSA multicast (224.0.0.5/6)" },
+      { label: "Convergencia",  val: "Rápida" },
+      { label: "Estándar",      val: "RFC 2328 (v2)" },
+      { label: "AD (Cisco)",    val: "110" },
+    ],
+    tags: ["Áreas OSPF", "DR/BDR", "LSA", "SPF Tree", "Classless", "IPv6 (v3)", "ECMP"],
+    refs: [
+      { txt: "RFC 2328 – OSPFv2 (IETF)",                     url: "https://www.rfc-editor.org/rfc/rfc2328" },
+      { txt: "Cisco – OSPF Design Guide",                    url: "https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/7039-1.html" },
+      { txt: "Moy, J. – OSPF: Anatomy of an Internet Routing Protocol", url: "https://books.google.com/books?id=GCCe8HhBIRIC" },
+    ],
+    videos: [{ txt: "OSPF explicado (YouTube)", url: "https://www.youtube.com/results?search_query=OSPF+routing+protocol+explained" }]
+  },
+  {
+    abbr: "EIGRP",
+    full: "Enhanced Interior Gateway Routing Protocol",
+    type: "IGP / Hybrid (Cisco)",
+    color: { badge: "#162908", badgeTxt: "#7ec44a" },
+    desc: "Protocolo propietario de Cisco (abierto desde 2013 – RFC 7868) que combina características de vector de distancia y estado de enlace. Usa el algoritmo DUAL para garantizar bucles libres y convergencia rápida. Soporta IPv4, IPv6 y múltiples protocolos de capa 3.",
+    characteristics: [
+      { label: "Algoritmo",     val: "DUAL (Diffusing Update)" },
+      { label: "Métrica",       val: "BW + Delay (compuesta)" },
+      { label: "Actualización", val: "Parcial multicast 224.0.0.10" },
+      { label: "Convergencia",  val: "Muy rápida" },
+      { label: "Estándar",      val: "RFC 7868 (2016)" },
+      { label: "AD (Cisco)",    val: "90 int / 170 ext" },
+    ],
+    tags: ["DUAL", "Feasible Successor", "Neighbor Table", "Topology Table", "VLSM", "Load Balancing", "Named Mode"],
+    refs: [
+      { txt: "RFC 7868 – EIGRP (IETF)",             url: "https://www.rfc-editor.org/rfc/rfc7868" },
+      { txt: "Cisco – EIGRP Configuration Guide",    url: "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/iproute_eigrp/configuration/xe-16/ire-xe-16-book.html" },
+      { txt: "Odom, W. – CCNA 200-301 Official Cert Guide", url: "https://books.google.com/books?id=CCNA200301" },
+    ],
+    videos: [{ txt: "EIGRP explicado (YouTube)", url: "https://www.youtube.com/results?search_query=EIGRP+routing+protocol+explained" }]
+  },
+  {
+    abbr: "BGP",
+    full: "Border Gateway Protocol",
+    type: "EGP / Path-Vector",
+    color: { badge: "#2e0e1a", badgeTxt: "#e07ba0" },
+    desc: "Protocolo de enrutamiento entre sistemas autónomos (AS) que gobierna el enrutamiento de Internet. Versión actual BGP-4 (RFC 4271). Utiliza atributos de ruta para tomar decisiones de enrutamiento basadas en políticas. Establece sesiones TCP (puerto 179) entre vecinos (peers).",
+    characteristics: [
+      { label: "Algoritmo",     val: "Path-Vector / Políticas" },
+      { label: "Métrica",       val: "Atributos (AS-Path, MED…)" },
+      { label: "Actualización", val: "Incremental TCP 179" },
+      { label: "Convergencia",  val: "Lenta (diseño estable)" },
+      { label: "Estándar",      val: "RFC 4271 (BGP-4)" },
+      { label: "AD (Cisco)",    val: "20 eBGP / 200 iBGP" },
+    ],
+    tags: ["eBGP", "iBGP", "AS Number", "AS-Path", "MED", "Local Preference", "Next-Hop", "Route Reflector", "MPLS/VPN"],
+    refs: [
+      { txt: "RFC 4271 – BGP-4 (IETF)",         url: "https://www.rfc-editor.org/rfc/rfc4271" },
+      { txt: "Cisco – BGP Best Practices",       url: "https://www.cisco.com/c/en/us/support/docs/ip/border-gateway-protocol-bgp/26634-bgp-toc.html" },
+      { txt: "Huston, G. – BGP in 2023 – APNIC Blog", url: "https://blog.apnic.net/category/bgp/" },
+    ],
+    videos: [{ txt: "BGP explicado (YouTube)", url: "https://www.youtube.com/results?search_query=BGP+Border+Gateway+Protocol+explained" }]
+  }
+];
+
+let current = 0, flipped = false;
+
+function renderTabs() {
+  document.getElementById('tabs').innerHTML = protocols.map((p, i) =>
+    `<button class="tab-btn${i === current ? ' active' : ''}" onclick="goTo(${i})">${p.abbr}</button>`
+  ).join('');
+}
+
+function renderCard() {
+  const p = protocols[current];
+
+  document.getElementById('cFront').innerHTML = `
+    <div class="card-front-body">
+      <span class="proto-badge" style="background:${p.color.badge};color:${p.color.badgeTxt}">${p.type}</span>
+      <div class="proto-name">${p.abbr}</div>
+      <div class="proto-full">${p.full}</div>
+      <div class="flip-hint">
+        <i class="ti ti-refresh" style="font-size:14px"></i> Clic para ver detalles
+      </div>
+    </div>
+    <div class="card-footer">
+      <span class="prog">${current + 1} / ${protocols.length}</span>
+      <span class="face-label">Frontal</span>
+    </div>`;
+
+  const chars = p.characteristics.map(c => `
+    <div class="info-cell">
+      <div class="ic-label">${c.label}</div>
+      <div class="ic-val">${c.val}</div>
+    </div>`).join('');
+
+  const refs = p.refs.map(r => `
+    <a class="ref-link" href="${r.url}" target="_blank" rel="noopener">
+      <i class="ti ti-external-link"></i>${r.txt}
+    </a>`).join('');
+
+  const vids = p.videos.map(v => `
+    <a class="video-chip" href="${v.url}" target="_blank" rel="noopener">
+      <i class="ti ti-player-play" style="font-size:13px"></i>${v.txt}
+    </a>`).join('');
+
+  document.getElementById('cBack').innerHTML = `
+    <div class="card-back-header">
+      <span class="back-badge" style="background:${p.color.badge};color:${p.color.badgeTxt}">${p.abbr}</span>
+      <span class="back-title">${p.full}</span>
+    </div>
+    <div class="card-back-body">
+      <div class="section-block">
+        <div class="section-label">Descripción</div>
+        <p class="desc-text">${p.desc}</p>
+      </div>
+      <div class="section-block">
+        <div class="section-label">Características técnicas</div>
+        <div class="grid2">${chars}</div>
+      </div>
+      <div class="section-block">
+        <div class="section-label">Conceptos clave</div>
+        <div class="tags-row">${p.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      </div>
+      <div class="section-block">
+        <div class="section-label">Referencias académicas</div>
+        ${refs}
+      </div>
+      <div class="section-block">
+        <div class="section-label">Recursos en video</div>
+        <div class="video-row">${vids}</div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <span class="prog">${current + 1} / ${protocols.length}</span>
+      <span class="face-label">Posterior</span>
+    </div>`;
+}
+
+function flipCard() {
+  flipped = !flipped;
+  document.getElementById('cardInner').classList.toggle('flipped', flipped);
+}
+
+function goTo(i) {
+  current = i;
+  flipped = false;
+  document.getElementById('cardInner').classList.remove('flipped');
+  renderTabs();
+  renderCard();
+}
+
+function move(dir) {
+  goTo((current + dir + protocols.length) % protocols.length);
+}
+
+renderTabs();
+renderCard();
+</script>
+</body>
+</html>
